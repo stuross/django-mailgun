@@ -46,15 +46,18 @@ class MailgunBackend(BaseEmailBackend):
         if not email_message.recipients():
             return False
         from_email = sanitize_address(email_message.from_email, email_message.encoding)
-        recipients = [sanitize_address(addr, email_message.encoding)
-                      for addr in email_message.recipients()]
+        to_emails = [sanitize_address(addr, email_message.encoding)
+                      for addr in email_message.to]
+        bcc_emails = [sanitize_address(addr, email_message.encoding)
+                      for addr in email_message.bcc]
 
         try:
             r = requests.\
                 post(self._api_url + "messages.mime",
                      auth=("api", self._access_key),
                      data={
-                            "to": ", ".join(recipients),
+                            "to": ", ".join(to_emails),
+                            "bcc": ", ".join(bcc_emails),
                             "from": from_email,
                          },
                      files={
